@@ -3,12 +3,11 @@ using SimpleEventDrivenKafka.Subscribers;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddSingleton<IHostedService, UserCreatedSubscriber>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddHostedService<UserCreatedSubscriber>();
 
 var app = builder.Build();
 

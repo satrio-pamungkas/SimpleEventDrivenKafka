@@ -9,22 +9,11 @@ public class UserCreatedProducer
         BootstrapServers = "localhost:9092"
     };
     
-    public Object EmitMessage(string topic, string message)
+    public void EmitMessage(string topic, string message)
     {
-        using (var producer = new ProducerBuilder<Null, string>(_producerConfig).Build())
-        {
-            try
-            {
-                return producer.ProduceAsync(topic, new Message<Null, string> {Value = message})
-                    .GetAwaiter()
-                    .GetResult();
-            }
-            catch (Exception error)
-            {
-                Console.WriteLine($"Error: {error}");
-            }
-        }
+        var producer = new ProducerBuilder<Null, string>(_producerConfig).Build();
+    
+        producer.ProduceAsync(topic, new Message<Null, string> { Value = message });
 
-        return null;
     }
 }

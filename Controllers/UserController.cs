@@ -9,12 +9,19 @@ namespace SimpleEventDrivenKafka.Controllers;
 [Route("[controller]")]
 public class UserController : ControllerBase
 {
-    private readonly UserCreatedProducer _userCreatedProducer = new UserCreatedProducer();
-    private readonly string topic = "registration";
+    private readonly UserCreatedProducer _userCreatedProducer;
+    private readonly string _topic;
+
+    public UserController(IConfiguration config)
+    {
+        this._userCreatedProducer = new UserCreatedProducer();
+        this._topic = config.GetValue<string>("Kafka:Topic");
+    }
+    
     [HttpPost]
     public ActionResult<User> Register (UserRequest request)
     {
-        _userCreatedProducer.EmitMessage(topic, request.FirstName!);
+        this._userCreatedProducer.EmitMessage(this._topic, request.FirstName!);
         var data = new User
         {
             Id = Guid.NewGuid(),
