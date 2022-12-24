@@ -21,7 +21,6 @@ public class UserController : ControllerBase
     [HttpPost]
     public ActionResult<User> Register (UserRequest request)
     {
-        this._userCreatedProducer.EmitMessage(this._topic, request.FirstName!);
         var data = new User
         {
             Id = Guid.NewGuid(),
@@ -30,6 +29,7 @@ public class UserController : ControllerBase
             LastName = request.LastName,
             PhoneNumber = request.PhoneNumber
         };
+        this._userCreatedProducer.EmitMessage(this._topic, data);
         
         return data;
     }

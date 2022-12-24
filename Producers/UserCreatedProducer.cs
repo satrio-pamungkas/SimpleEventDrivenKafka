@@ -1,4 +1,6 @@
 using Confluent.Kafka;
+using SimpleEventDrivenKafka.Utils;
+using SimpleEventDrivenKafka.Models;
 
 namespace SimpleEventDrivenKafka.Producers;
 
@@ -9,11 +11,13 @@ public class UserCreatedProducer
         BootstrapServers = "localhost:9092"
     };
     
-    public void EmitMessage(string topic, string message)
+    public void EmitMessage(string topic, User payload)
     {
-        var producer = new ProducerBuilder<Null, string>(_producerConfig).Build();
+        var producer = new ProducerBuilder<Null, User>(_producerConfig)
+            .SetValueSerializer(new PayloadSerializer<User>())
+            .Build();
     
-        producer.ProduceAsync(topic, new Message<Null, string> { Value = message });
+        producer.ProduceAsync(topic, new Message<Null, User> { Value = payload });
 
     }
 }

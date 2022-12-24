@@ -1,19 +1,29 @@
-using System.Text.Json;
+// using System.Text.Json;
 using Confluent.Kafka;
+using Confluent.Kafka.SyncOverAsync;
+using SimpleEventDrivenKafka.Handlers;
+using SimpleEventDrivenKafka.Models;
+using SimpleEventDrivenKafka.Utils;
 
 namespace SimpleEventDrivenKafka.Subscribers;
 
 public class UserCreatedSubscriber : BackgroundService
 {
     private readonly string _topic;
-    private readonly IConsumer<Ignore, string> _kafkaConsumer;
+    private readonly IConsumer<Ignore, User> _kafkaConsumer;
+    private readonly EmailHandler _emailHandler;
+    private readonly SmsHandler _smsHandler;
 
     public UserCreatedSubscriber(IConfiguration config)
     {
         var consumerConfig = new ConsumerConfig();
         config.GetSection("Kafka:ConsumerSettings").Bind(consumerConfig);
         this._topic = config.GetValue<string>("Kafka:Topic");
-        this._kafkaConsumer = new ConsumerBuilder<Ignore, string>(consumerConfig).Build();
+        this._kafkaConsumer = new ConsumerBuilder<Ignore, User>(consumerConfig)
+            .SetValueDeserializer(new PayloadDeserializer<User>().AsSyncOverAsync())
+            .Build();
+        this._emailHandler = new EmailHandler();
+        this._smsHandler = new SmsHandler();
     }
 
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
@@ -32,8 +42,8 @@ public class UserCreatedSubscriber : BackgroundService
                 var consumer = this._kafkaConsumer.Consume(cancellationToken);
 
                 // Handle message...
-                // var message = JsonSerializer.Deserialize<Message<Null, string>>(cr.Message.Value);
-                Console.WriteLine($"Message : {consumer.Message.Value}");
+                this._emailHandler.SendEmail(consumer.Message.Value.Email!);
+                this._smsHandler.SendSms(consumer.Message.Value.PhoneNumber!);
             }
             catch (OperationCanceledException)
             {
