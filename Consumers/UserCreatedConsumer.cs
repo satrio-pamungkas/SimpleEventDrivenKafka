@@ -5,16 +5,16 @@ using SimpleEventDrivenKafka.Handlers;
 using SimpleEventDrivenKafka.Models;
 using SimpleEventDrivenKafka.Utils;
 
-namespace SimpleEventDrivenKafka.Subscribers;
+namespace SimpleEventDrivenKafka.Consumers;
 
-public class UserCreatedSubscriber : BackgroundService
+public class UserCreatedConsumer : BackgroundService
 {
     private readonly string _topic;
     private readonly IConsumer<Ignore, User> _kafkaConsumer;
     private readonly EmailHandler _emailHandler;
     private readonly SmsHandler _smsHandler;
 
-    public UserCreatedSubscriber(IConfiguration config)
+    public UserCreatedConsumer(IConfiguration config)
     {
         var consumerConfig = new ConsumerConfig();
         config.GetSection("Kafka:ConsumerSettings").Bind(consumerConfig);
